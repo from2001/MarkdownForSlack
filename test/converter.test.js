@@ -78,6 +78,51 @@ test('inline formatting, entities and line breaks survive normalization', () => 
   assert.equal(fragment.querySelectorAll('br').length, 1);
 });
 
+for (const colon of [':', '：']) {
+  test(`bold labels ending in ${colon} close before adjacent text in the reported list`, () => {
+    const items = [
+      ['ノーコード・マルチデバイス対応', 'プログラミング知識がなくてもXRコンテンツを制作・配信可能。Apple Vision Pro、Meta Quest、Pico、スマートフォン、Webブラウザなど多様なデバイスに対応しています。'],
+      ['グローバルなクリエイターエコシステム', '世界39カ国以上にわたる97,000人以上の登録クリエイターコミュニティを擁し、15万以上のXRコンテンツが配信されています。'],
+      ['ロケーションベースエンターテインメント（LBE）', '都市や商業施設、エンターテインメント空間に特化したXR体験を提供し、店舗・施設のメディア化を推進しています。'],
+    ];
+    const result = convert(items.map(([label, body]) => `- **${label}${colon}**${body}`).join('\n'));
+    const list = dom(result.html).querySelectorAll('li');
+    assert.equal(list.length, items.length);
+    items.forEach(([label, body], index) => {
+      assert.equal(list[index].querySelector('strong').textContent, label + colon);
+      assert.equal(list[index].textContent, label + colon + body);
+    });
+    assert.equal(result.plain, items.map(([label, body]) => `• ${label}${colon}${body}`).join('\n'));
+  });
+}
+
+test('colon-ended bold preserves adjacent formatting, nested code, links, and table cells', () => {
+  const result = convert('前**項目：**説明**次:**text\n\n**_補足_ `値：**文字` [資料](https://example.com)：**本文\n\n[**リンク：**説明](https://example.org)\n\n| A | B |\n|---|---|\n| **表：**値 | 通常 |');
+  const fragment = dom(result.html);
+  assert.equal(fragment.querySelector('p').innerHTML, '前<strong>項目：</strong>説明<strong>次:</strong>text');
+  assert.equal(fragment.querySelector('strong em').textContent, '補足');
+  assert.equal(fragment.querySelector('strong code').textContent, '値：**文字');
+  assert.equal(fragment.querySelector('strong a').getAttribute('href'), 'https://example.com');
+  assert.equal(fragment.querySelector('a strong').textContent, 'リンク：');
+  assert.match(result.html, /<strong>表：<\/strong>値/);
+  assert.match(result.plain, /資料 \(https:\/\/example.com\)：本文/);
+});
+
+test('colon-ended bold leaves literal contexts, escapes, unfinished input, and other emphasis unchanged', () => {
+  const literal = '**項目：**説明';
+  const result = convert('```md\n' + literal + '\n```\n\n    ' + literal + '\n\n`' + literal + '`\n\n'
+    + String.raw`\*\*項目：\*\*説明` + '\n\n[資料](https://example.com/:**path)\n\n<span title="' + literal + '">text</span>');
+  const fragment = dom(result.html);
+  assert.equal(fragment.querySelector('strong'), null);
+  assert.deepEqual([...fragment.querySelectorAll('code')].map((node) => node.textContent), [literal, literal, literal]);
+  assert.equal(fragment.querySelector('a').getAttribute('href'), 'https://example.com/:**path');
+  assert.ok(result.plain.includes(literal));
+  assert.ok(result.plain.includes('<span title="' + literal + '">'));
+  assert.equal(convert('**未完了：').plain, '**未完了：');
+  assert.equal(convert(String.raw`**項目：\*\*説明`).plain, literal);
+  assert.equal(convert('*斜体* **太字** ***両方***').html, '<p><em>斜体</em> <strong>太字</strong> <em><strong>両方</strong></em></p>');
+});
+
 test('quotes and dividers use supported formatting and textual fallbacks', () => {
   const result = convert('> **引用**\n> 続き\n\n---\n\n本文');
   assert.equal(result.plain, '> 引用\n> 続き\n\n────────\n\n本文');
