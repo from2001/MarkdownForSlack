@@ -33,6 +33,8 @@ Slack's **Format messages with markup** preference must be off to retain rich fo
 
 The converter parses Markdown into tokens, normalizes those tokens into a limited block/inline model, and derives both preview HTML and plain text from that model. HTML tags are generated only from a closed vocabulary. Input text and attributes are escaped, and links allow only absolute HTTP(S) and mailto URLs. Conversion notices are outside the copied content. The original editor text is never rewritten.
 
+Bold labels may end with an ASCII or full-width colon and immediately precede text, such as `**Label:**text` or `**項目：**本文`. This deliberately relaxes CommonMark's closing-delimiter rule for two-star bold labels. The colon remains bold, no extra space is inserted, and escaped stars, code, and link destinations remain literal.
+
 ## Development and deployment
 
 ```sh

@@ -1,4 +1,19 @@
-import { marked } from './vendor/marked.esm.js';
+import { Marked, Tokenizer } from './vendor/marked.esm.js';
+
+const markdown = new Marked({
+  gfm: true,
+  breaks: true,
+  tokenizer: {
+    emStrong(source, maskedSource, previousCharacter) {
+      if (!/^\*\*(?!\*)/.test(source)) return false;
+      // Allow **Label:**text and **項目：**本文 without adding visible whitespace.
+      // Change only the delimiter mask, preserving source offsets and Marked's
+      // existing protection for escaped stars, code, and link destinations.
+      const relaxedMask = maskedSource.replace(/[:：](?=\*\*(?!\*))/g, 'a');
+      return Tokenizer.prototype.emStrong.call(this, source, relaxedMask, previousCharacter);
+    },
+  },
+});
 
 const text = (value) => ({ type: 'text', value });
 const paragraph = (children) => ({ type: 'paragraph', children });
@@ -186,6 +201,6 @@ export function convertMarkdown(source, { tableMode = 'fields', document = globa
     });
   }
 
-  const normalized = blocks(marked.lexer(source, { gfm: true, breaks: true }));
+  const normalized = blocks(markdown.lexer(source));
   return { blocks: normalized, html: blocksHtml(normalized), plain: blocksPlain(normalized), changes };
 }
