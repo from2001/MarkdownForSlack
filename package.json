@@ -1,0 +1,16 @@
+{
+  "name": "markdown-for-slack",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "vendor": "node scripts/vendor.mjs"
+  },
+  "dependencies": {
+    "marked": "18.0.14"
+  },
+  "devDependencies": {
+    "jsdom": "26.1.0"
+  }
+}

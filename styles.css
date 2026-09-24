@@ -1,0 +1,97 @@
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body {
+  display: flex;
+  flex-direction: column;
+  background: #1e1e1e;
+  color: #e8e8e8;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", Meiryo, sans-serif;
+}
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 12px 18px;
+  background: #252526;
+  border-bottom: 1px solid #3a3a3a;
+}
+h1 { margin: 0; font-size: 16px; font-weight: 650; }
+h1 span { color: #aaa; font-weight: 400; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; }
+button, select { font: inherit; font-size: 13px; border-radius: 5px; }
+button { padding: 9px 14px; border: 1px solid transparent; cursor: pointer; background: #0e639c; color: white; }
+button:hover { background: #1177bb; }
+button.secondary { background: #3a3d41; }
+button.secondary:hover { background: #4a4d51; }
+button:disabled { opacity: .45; cursor: default; }
+:focus-visible { outline: 2px solid #69bdf3; outline-offset: 2px; }
+.container { flex: 1; min-height: 0; display: flex; }
+.pane { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.preview-pane { border-left: 1px solid #444; }
+.pane-header {
+  min-height: 48px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #2a2a2a;
+  border-bottom: 1px solid #3a3a3a;
+  color: #c5c5c5;
+  font-size: 12px;
+}
+.pane-header > span:last-child:not(:first-child) { color: #aaa; font-size: 11px; }
+.table-option { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+select { padding: 4px 7px; color: #eee; background: #36383b; border: 1px solid #555; }
+#editor {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  padding: 20px;
+  border: none;
+  border-radius: 0;
+  resize: none;
+  background: #1e1e1e;
+  color: #e8e8e8;
+  font: 14px/1.7 "SF Mono", Menlo, Monaco, Consolas, monospace;
+  tab-size: 2;
+}
+#editor:focus-visible { outline-offset: -2px; }
+#editor::placeholder { color: #969696; }
+.conversion-summary { padding: 9px 16px; color: #c2d6e3; background: #23323b; font-size: 12px; line-height: 1.6; }
+.preview-scroll { position: relative; flex: 1; min-height: 0; overflow: auto; background: white; color: #1d1c1d; }
+#preview { padding: 20px 24px; font-size: 15px; line-height: 1.5; overflow-wrap: anywhere; }
+#preview:empty { padding: 0; }
+.empty-preview { padding: 40px 24px; color: #777; font-size: 14px; line-height: 1.9; }
+#preview p { margin: 0 0 1em; }
+#preview p:last-child { margin-bottom: 0; }
+#preview strong { font-weight: 700; }
+#preview em { font-style: italic; }
+#preview code { background: #f4f4f4; color: #b72749; padding: 1px 3px; border-radius: 3px; border: 1px solid #e8e8e8; font: .9em Menlo, Monaco, Consolas, monospace; white-space: pre-wrap; }
+#preview pre { background: #f4f4f4; border: 1px solid #dedede; border-radius: 4px; padding: 10px 12px; overflow: auto; margin: 0 0 1em; }
+#preview pre code { background: transparent; color: #1d1c1d; border: none; padding: 0; white-space: pre; }
+#preview blockquote { border-left: 4px solid #bbb; padding-left: 12px; margin: 0 0 1em; }
+#preview ul, #preview ol { padding-left: 1.8em; margin: 0 0 1em; }
+#preview li { margin: .25em 0; }
+#preview li > p { margin-bottom: .3em; }
+#preview li > ul, #preview li > ol { margin-bottom: .3em; }
+#preview a { color: #1264a3; text-decoration: underline; }
+.paste-help { margin: 0; padding: 10px 16px; background: #f3f3f3; color: #616061; border-top: 1px solid #ddd; font-size: 11px; line-height: 1.6; }
+.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); max-width: calc(100% - 32px); padding: 12px 20px; border-radius: 6px; background: #216a3b; color: white; opacity: 0; pointer-events: none; transition: opacity .15s; font-size: 13px; box-shadow: 0 3px 15px #0003; z-index: 10; }
+.toast.error { background: #a1260d; }
+.toast.show { opacity: 1; }
+@media (max-width: 700px) {
+  body { min-height: 100dvh; height: auto; }
+  header { padding: 12px; }
+  .actions { gap: 6px; }
+  button { padding: 8px 10px; font-size: 12px; }
+  .container { flex-direction: column; }
+  #editor { flex: none; min-height: 280px; height: 35dvh; }
+  .preview-pane { border-left: 0; border-top: 1px solid #444; }
+  .preview-scroll { flex: none; min-height: 240px; max-height: 65dvh; }
+  .pane-header { padding: 8px 12px; }
+  #preview { padding: 18px; }
+}
