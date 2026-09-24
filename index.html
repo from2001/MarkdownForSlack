@@ -1,275 +1,46 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Markdown Preview</title>
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-<style>
-  * { box-sizing: border-box; }
-  html, body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans",
-      "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
-    background: #1e1e1e;
-    color: #e8e8e8;
-  }
-  header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 16px;
-    background: #252526;
-    border-bottom: 1px solid #333;
-    height: 52px;
-  }
-  header h1 {
-    font-size: 14px;
-    font-weight: 600;
-    margin: 0;
-    color: #ccc;
-    letter-spacing: 0.3px;
-  }
-  .actions { display: flex; gap: 8px; }
-  button {
-    background: #0e639c;
-    color: white;
-    border: none;
-    padding: 8px 14px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: 500;
-    transition: background 0.15s;
-  }
-  button:hover { background: #1177bb; }
-  button.secondary { background: #3a3d41; }
-  button.secondary:hover { background: #4a4d51; }
-  button.success { background: #2d7a3a; }
-  .container {
-    display: flex;
-    height: calc(100% - 52px);
-  }
-  .pane {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-  }
-  .pane-header {
-    padding: 6px 14px;
-    font-size: 11px;
-    font-weight: 600;
-    color: #888;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    background: #2a2a2a;
-    border-bottom: 1px solid #333;
-  }
-  #editor {
-    flex: 1;
-    width: 100%;
-    background: #1e1e1e;
-    color: #e8e8e8;
-    border: none;
-    outline: none;
-    padding: 16px;
-    font-family: "SF Mono", Menlo, Monaco, Consolas, "Courier New", monospace;
-    font-size: 14px;
-    line-height: 1.6;
-    resize: none;
-  }
-  .divider {
-    width: 1px;
-    background: #333;
-    cursor: col-resize;
-  }
-  #preview {
-    flex: 1;
-    overflow: auto;
-    padding: 20px 24px;
-    background: #ffffff;
-    color: #1d1c1d;
-    font-size: 15px;
-    line-height: 1.5;
-  }
-  /* Slack-like preview styles */
-  #preview h1, #preview h2, #preview h3, #preview h4 {
-    font-weight: 700;
-    margin: 1em 0 0.5em;
-    line-height: 1.3;
-  }
-  #preview h1 { font-size: 1.5em; }
-  #preview h2 { font-size: 1.3em; }
-  #preview h3 { font-size: 1.15em; }
-  #preview p { margin: 0.5em 0; }
-  #preview strong { font-weight: 700; }
-  #preview em { font-style: italic; }
-  #preview code {
-    background: #f4f4f4;
-    color: #e01e5a;
-    padding: 2px 5px;
-    border-radius: 3px;
-    border: 1px solid #e8e8e8;
-    font-family: Menlo, Monaco, Consolas, monospace;
-    font-size: 0.9em;
-  }
-  #preview pre {
-    background: #f4f4f4;
-    border: 1px solid #e8e8e8;
-    border-radius: 4px;
-    padding: 8px 12px;
-    overflow: auto;
-    margin: 0.5em 0;
-  }
-  #preview pre code {
-    background: transparent;
-    border: none;
-    padding: 0;
-    color: #1d1c1d;
-  }
-  #preview blockquote {
-    border-left: 4px solid #bbb;
-    padding-left: 12px;
-    color: #555;
-    margin: 0.5em 0;
-  }
-  #preview ul, #preview ol {
-    padding-left: 1.6em;
-    margin: 0.5em 0;
-  }
-  #preview li { margin: 0.2em 0; }
-  #preview a { color: #1264a3; text-decoration: underline; }
-  #preview hr { border: none; border-top: 1px solid #ddd; margin: 1em 0; }
-  #preview table {
-    border-collapse: collapse;
-    margin: 0.5em 0;
-  }
-  #preview th, #preview td {
-    border: 1px solid #ddd;
-    padding: 6px 10px;
-  }
-  #preview th { background: #f4f4f4; }
-  .toast {
-    position: fixed;
-    bottom: 24px;
-    left: 50%;
-    transform: translateX(-50%) translateY(20px);
-    background: #2d7a3a;
-    color: white;
-    padding: 10px 20px;
-    border-radius: 4px;
-    font-size: 14px;
-    opacity: 0;
-    transition: all 0.25s;
-    pointer-events: none;
-    z-index: 1000;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.3);
-  }
-  .toast.show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="MarkdownをSlackで使える書式へ変換して、プレビュー・コピーできます。">
+  <title>Markdown for Slack</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script type="module" src="./app.js"></script>
 </head>
 <body>
-<header>
-  <h1>Markdown Preview</h1>
-  <div class="actions">
-    <button id="copyRich">書式付きでコピー</button>
-    <button id="clear" class="secondary">クリア</button>
-  </div>
-</header>
-<div class="container">
-  <div class="pane">
-    <div class="pane-header">Markdown</div>
-    <textarea id="editor" placeholder="ここにMarkdownを入力..." spellcheck="false"></textarea>
-  </div>
-  <div class="divider"></div>
-  <div class="pane">
-    <div class="pane-header">プレビュー（Slack貼り付け用）</div>
-    <div id="preview"></div>
-  </div>
-</div>
-<div id="toast" class="toast"></div>
-
-<script>
-  const editor = document.getElementById('editor');
-  const preview = document.getElementById('preview');
-  const toast = document.getElementById('toast');
-
-  // Configure marked: GFM, line breaks like Slack
-  marked.setOptions({
-    gfm: true,
-    breaks: true,
-  });
-
-  function render() {
-    preview.innerHTML = marked.parse(editor.value);
-  }
-
-  function showToast(message, success = true) {
-    toast.textContent = message;
-    toast.style.background = success ? '#2d7a3a' : '#a1260d';
-    toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 1800);
-  }
-
-  async function copyRichText() {
-    const html = preview.innerHTML;
-    const plain = preview.innerText;
-    try {
-      if (navigator.clipboard && window.ClipboardItem) {
-        const item = new ClipboardItem({
-          'text/html': new Blob([html], { type: 'text/html' }),
-          'text/plain': new Blob([plain], { type: 'text/plain' }),
-        });
-        await navigator.clipboard.write([item]);
-      } else {
-        // Fallback: select preview node and execCommand copy
-        const range = document.createRange();
-        range.selectNodeContents(preview);
-        const sel = window.getSelection();
-        sel.removeAllRanges();
-        sel.addRange(range);
-        document.execCommand('copy');
-        sel.removeAllRanges();
-      }
-      showToast('書式付きでコピーしました（Slackに貼り付け可能）');
-    } catch (err) {
-      console.error(err);
-      showToast('コピーに失敗しました', false);
-    }
-  }
-
-  document.getElementById('copyRich').addEventListener('click', copyRichText);
-  document.getElementById('clear').addEventListener('click', () => {
-    if (editor.value === '' || confirm('入力内容をクリアしますか？')) {
-      editor.value = '';
-      render();
-      editor.focus();
-    }
-  });
-
-  editor.addEventListener('input', render);
-
-  // Tab key inserts indentation instead of changing focus
-  editor.addEventListener('keydown', (e) => {
-    if (e.key === 'Tab') {
-      e.preventDefault();
-      const start = editor.selectionStart;
-      const end = editor.selectionEnd;
-      editor.value = editor.value.slice(0, start) + '  ' + editor.value.slice(end);
-      editor.selectionStart = editor.selectionEnd = start + 2;
-      render();
-    }
-  });
-
-  // Always start with an empty editor on each page load
-  editor.value = '';
-  render();
-</script>
+  <header>
+    <h1>Markdown <span>for Slack</span></h1>
+    <div class="actions">
+      <button id="copyRich" disabled>書式付きでコピー</button>
+      <button id="copyPlain" class="secondary" disabled>テキストでコピー</button>
+      <button id="clear" class="secondary">クリア</button>
+    </div>
+  </header>
+  <main class="container">
+    <section class="pane" aria-labelledby="editorLabel">
+      <div class="pane-header"><label id="editorLabel" for="editor">Markdown</label><span>入力はブラウザ内で変換</span></div>
+      <textarea id="editor" placeholder="ここにMarkdownを貼り付けてください。&#10;&#10;# 見出し → 本文サイズの太字&#10;表 → 項目名：値&#10;- [ ] タスク → ☐ タスク" spellcheck="false"></textarea>
+    </section>
+    <section class="pane preview-pane" aria-labelledby="previewLabel">
+      <div class="pane-header">
+        <span id="previewLabel">プレビュー（Slack貼り付け用）</span>
+        <label class="table-option" for="tableMode">表の表示
+          <select id="tableMode">
+            <option value="fields">項目ごと</option>
+            <option value="code">等幅（コード）</option>
+          </select>
+        </label>
+      </div>
+      <div id="conversionSummary" class="conversion-summary" role="status">読み込み中…</div>
+      <div class="preview-scroll">
+        <div id="emptyPreview" class="empty-preview" hidden>左にMarkdownを貼り付けると、<br>Slack向けに変換した内容がここに表示されます。</div>
+        <div id="preview" tabindex="0" aria-label="変換後のプレビュー"></div>
+      </div>
+      <p class="paste-help">Slackの通常の入力欄に貼り付けてください。マークアップ入力モードでは書式が保持されません。</p>
+    </section>
+  </main>
+  <div id="toast" class="toast" role="status"></div>
+  <noscript>このアプリを利用するにはJavaScriptを有効にしてください。</noscript>
 </body>
 </html>
