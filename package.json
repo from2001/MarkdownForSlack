@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "test": "node --test",
-    "vendor": "node scripts/vendor.mjs"
+    "vendor": "node scripts/vendor.mjs",
+    "build:deploy": "node scripts/prepare-deploy.mjs",
+    "verify:deploy": "node scripts/verify-deploy.mjs"
   },
   "dependencies": {
     "marked": "18.0.14"
