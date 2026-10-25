@@ -4,7 +4,7 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { deployFiles } from './prepare-deploy.mjs';
 
-export const productionUrl = 'https://yamaguchimasahiro.com/web/MarkdownForSlack/';
+export const productionUrl = 'https://from2001.github.io/MarkdownForSlack/';
 const digest = (value) => createHash('sha256').update(value).digest('hex');
 const root = fileURLToPath(new URL('../.deploy/', import.meta.url));
 
@@ -12,6 +12,8 @@ const root = fileURLToPath(new URL('../.deploy/', import.meta.url));
 export async function verifyDeployment({ baseUrl = productionUrl, directory = root, fetcher = fetch } = {}) {
   const base = new URL(baseUrl);
   if (base.protocol !== 'https:') throw new Error('Deployment verification requires HTTPS');
+  // Resolve assets inside the site directory even when the reported URL lacks a trailing slash.
+  if (!base.pathname.endsWith('/')) base.pathname += '/';
   for (const file of deployFiles) {
     const url = new URL(file, base);
     url.searchParams.set('deploy-check', process.env.GITHUB_SHA || String(Date.now()));
@@ -36,7 +38,8 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   let verified = false;
   for (let attempt = 1; attempt <= 3; attempt++) {
     try {
-      await verifyDeployment();
+      // The workflow passes the URL reported by GitHub Pages, which follows any custom domain.
+      await verifyDeployment({ baseUrl: process.env.DEPLOY_URL || productionUrl });
       verified = true;
       break;
     } catch (error) {

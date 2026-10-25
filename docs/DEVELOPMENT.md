@@ -52,45 +52,35 @@ Marked is pinned and vendored locally to avoid runtime CDN requests and unreview
 
 The automated suite covers conversion, information preservation, unsafe input, clipboard payloads, and the copy fallback. Browser acceptance should also check real clipboard HTML/plain text, narrow-screen layout, and pasting into a Slack draft without sending it.
 
-## Automatic deployment to Lolipop
+## Automatic deployment to GitHub Pages
 
-The `Test and deploy to Lolipop` workflow tests pull requests to `main`. A push to `main` (including a merged pull request), or a manual run on `main`, deploys the site after the tests pass.
+The `Test and deploy to GitHub Pages` workflow tests pull requests to `main`. A push to `main` (including a merged pull request), or a manual run on `main`, publishes the site to GitHub Pages after the tests pass. No server, FTP account, or deployment secret is needed.
 
-Production URL: https://yamaguchimasahiro.com/web/MarkdownForSlack/
+Production URL: https://from2001.github.io/MarkdownForSlack/
 
 ### One-time configuration
 
-In **Settings → Secrets and variables → Actions**, configure:
+In **Settings → Pages → Build and deployment**, set **Source** to **GitHub Actions**. GitHub manages the resulting `github-pages` environment, which by default only accepts deployments from the default branch (`main`).
 
-| Type | Name | Value |
-| --- | --- | --- |
-| Repository secret | `FTP_PASSWORD` | The FTP password; enter it directly into GitHub Secrets |
-| Repository variable | `FTP_HOST` | The FTP hostname from Lolipop, without a URL scheme or port |
-| Repository variable | `FTP_USERNAME` | The FTP account name |
-| Repository variable | `FTP_REMOTE_DIR` | The existing FTP directory `/web/MarkdownForSlack` |
+Then open **Actions → Test and deploy to GitHub Pages → Run workflow**, choose `main`, and run it once. Check both jobs and the public-content verification step. Subsequent updates to `main` deploy automatically. If Pages is not enabled, the publish step fails before anything is published.
 
-Use the FTP account's path, not an inferred server filesystem path. The destination must already exist and its final component must be exactly `MarkdownForSlack`.
-
-The workflow uses **explicit FTPS on port 21**, passive data transfers, and TLS certificate verification for both authentication and uploaded data. FTPS and SFTP are different protocols. See [Lolipop's FTP settings](https://lolipop.jp/manual/hp/ftp-set/). If FTP access is restricted by client IP, the runner needs an allowed connection; the workflow does not alter access restrictions. See [Lolipop's FTP access controls](https://lolipop.jp/manual/user/ftpaccess/).
-
-After saving the settings, open **Actions → Test and deploy to Lolipop → Run workflow**, choose `main`, and run it once. Check both jobs and the public-content verification step. Subsequent updates to `main` deploy automatically. Missing settings fail with the required setting names before contacting the server.
+To serve the site from a custom domain, configure it in the same Pages settings. The workflow verifies whichever URL GitHub Pages reports.
 
 ### Deployment behavior
 
 - `scripts/deploy-files.json` lists the public assets. Add new runtime assets to this list when the app starts using them.
-- `npm run build:deploy` creates `.deploy/` from that list. Source tooling, tests, dependencies, and credentials are not uploaded.
-- All files are uploaded under unique temporary names, then renamed into place with `index.html` last. This avoids publishing truncated uploads, but the whole directory update is not atomic. An interruption during renaming may require rerunning the workflow.
-- Unrelated files and server configuration, including `.htaccess`, are not deleted. Retired public files require deliberate removal separately.
-- Deployments run one at a time and are not cancelled midway. A queued run checks the current `main` revision before uploading so an old rerun cannot overwrite a newer deployment.
-- `npm run verify:deploy` fetches every public asset over HTTPS, checks exact content hashes, and checks JavaScript MIME types. Upload success alone does not count as a successful deployment.
-- The `production` environment links to the site. Pull requests and manual runs on other branches never receive a deployment job.
+- `npm run build:deploy` creates `.deploy/` from that list, and only that directory is uploaded as the Pages artifact. Source tooling, tests, documentation, and dependencies are not published.
+- Each deployment replaces the whole site with the artifact, so files removed from the list disappear from the site.
+- GitHub Pages serves the artifact as-is over HTTPS, without Jekyll processing, and serves JavaScript modules with a JavaScript MIME type.
+- Deployments run one at a time and are not cancelled midway. A queued run checks the current `main` revision before publishing so an old rerun cannot overwrite a newer deployment.
+- `npm run verify:deploy` fetches every public asset over HTTPS, checks exact content hashes, and checks JavaScript MIME types. Publish success alone does not count as a successful deployment.
+- The `github-pages` environment links to the site. Pull requests and manual runs on other branches never receive a deployment job.
 
 Additional local checks:
 
 ```sh
-python3 -m unittest discover -s test -p '*_test.py' -v
 npm run build:deploy
 npm run verify:deploy
 ```
 
-The last command reads the production site without uploading. To restore an earlier release, revert its change through a pull request and merge the revert into `main`.
+The last command reads the production site without publishing. Set `DEPLOY_URL` to check another address. To restore an earlier release, revert its change through a pull request and merge the revert into `main`.
