@@ -24,13 +24,16 @@ test('public verification checks every file and rejects stale data, HTTP errors 
     await prepareDeployment(directory);
     const fetched = [];
     const fetcher = async (url) => {
-      const file = url.pathname.replace('/web/MarkdownForSlack/', '');
+      const file = url.pathname.replace('/MarkdownForSlack/', '');
       fetched.push(file);
       return new Response(await readFile(join(directory, file)), {
         headers: { 'content-type': file.endsWith('.js') ? 'text/javascript; charset=UTF-8' : 'text/plain' },
       });
     };
     await verifyDeployment({ directory, fetcher });
+    assert.deepEqual(fetched, deployFiles);
+    fetched.length = 0;
+    await verifyDeployment({ baseUrl: 'https://example.github.io/MarkdownForSlack', directory, fetcher });
     assert.deepEqual(fetched, deployFiles);
     await assert.rejects(verifyDeployment({ directory, fetcher: async () => new Response('old') }), /does not match/);
     await assert.rejects(verifyDeployment({ directory, fetcher: async () => new Response('missing', { status: 404 }) }), /HTTP 404/);
